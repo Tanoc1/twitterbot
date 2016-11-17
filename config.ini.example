@@ -1,0 +1,20 @@
+[Twitter]
+ConsumerKey: key 
+ConsumerSecret: key
+AccessToken: key
+AccessTokenSecret: key
+User: realdonaldtrump
+
+[IRC]
+Nickname: NickServ
+RealName: Ano Nyymi
+Username: anonyymi
+Server: irc.stealth.net
+Port: 6667
+Channels: #kanava,#kanava2
+UseSSL: no
+
+[BotOptions]
+BlacklistedWords: http,@POTUS
+FollowReplies: yes
+TweetCooldown: 60
