@@ -1,3 +1,11 @@
+# Twitterbot
+IRC-botti, jolla voi lähetellä IRC-kanavalta Twitteriin.
+
+IRC-komennot:
+    !t viesti: lähettää yksinkertaisen twiitin
+    !tr tweetid viesti: lähettää viestin replynä tiettyyn twiittiin
+    !ti imgur.com/kuva.jpg viesti: lähettää twiitin kuvalla, joka ladataan imgurin kautta
+
 Muista config! Avaimet saa apps.twitter.com. UseSSL ja FollowReplies vaativat yes/no-argumentin
 Erota kanavat ja mustalistatut sanat toisistaan pilkulla, älä käytä välejä. Jos et halua
 mustalistata mitään sanoja, kirjoita BlacklistedWordsin arvoksi none. FollowReplies
