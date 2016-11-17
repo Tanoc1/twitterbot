@@ -6,5 +6,5 @@ TweetCooldown on sekunneissa, ja määrää miten usein kanavalta voidaan lähet
 
 Asenna python-paketit: tweepy, urlparse, cryptography, requests, ConfigParser, twisted
 
-Stream katkeilee?:
+Replyjä seuraava stream katkeilee?:
 https://github.com/tweepy/tweepy/commit/c1eddf1a5788ec4947d3a363dfe165ea599c31fc
