@@ -1,5 +1,5 @@
 # Twitterbot
-IRC-botti, jolla voi lähetellä viestejä IRC-kanavalta Twitteriin.
+Python 2.7:lla, Tweepyllä ja Twistedillä toteutettu IRC-botti, jolla voi lähetellä viestejä IRC-kanavalta Twitteriin.
 
 IRC-komennot:
 

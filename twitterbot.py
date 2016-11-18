@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: UTF-8 -*-
 import tweepy, requests, time, os, ConfigParser
 from twisted.internet import defer, ssl, endpoints, protocol, reactor, task
