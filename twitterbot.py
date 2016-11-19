@@ -1,5 +1,8 @@
 #!/usr/bin/env python2.7
 # -*- coding: UTF-8 -*-
+"""Built on habnabit's example twisted IRC bot:
+   https://gist.github.com/habnabit/5823693"""
+
 import tweepy, requests, time, os, ConfigParser
 from twisted.internet import defer, ssl, endpoints, protocol, reactor, task
 from twisted.words.protocols import irc
