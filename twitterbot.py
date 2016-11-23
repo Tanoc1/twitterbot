@@ -39,8 +39,9 @@ class IRCProtocol(irc.IRCClient):
         self.cooldown = config.getint('BotOptions', 'TweetCooldown')
 
     def connectionLost(self, reason):
-        print("IRC-yhteys poikki:")
-        self.deferred.errback(reason)
+        print("IRC-yhteys poikki: %s" % (reason))
+        print("Yritetään uudelleenyhdistää.")
+        connector.connect()
 
     def signedOn(self):
         # This is called once the server has acknowledged that we sent

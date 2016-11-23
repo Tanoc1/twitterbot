@@ -1,4 +1,6 @@
 # Twitterbot TODO
+* Mietitään miksei reconnectaus pelaa
+
 * Replyjenseuranta järkevämmäksi (nykyisellään erillinen thread kirjoittaa saadut viestit tiedostoon, josta toinen looppi lukee ne IRC-kanavalle ja tyhjentää tiedoston)
 
 * !ti-komento:
