@@ -40,8 +40,6 @@ class IRCProtocol(irc.IRCClient):
 
     def connectionLost(self, reason):
         print("IRC-yhteys poikki: %s" % (reason))
-        print("Yritetään uudelleenyhdistää.")
-        connector.connect()
 
     def signedOn(self):
         # This is called once the server has acknowledged that we sent
@@ -74,7 +72,7 @@ class IRCProtocol(irc.IRCClient):
         func = getattr(self, 'command_' + command, None)
         irc.IRCClient # Or, if there was no function, ignore the message.
         currenttime = int(time.time()) # uuden komennon lähetysaika talteen
-        if func is None or (currenttime-self.lasttime < self.cooldown) or any(word in rest for word in blacklist): 
+        if func is None or (currenttime-self.lasttime < self.cooldown): 
         #tarkistaa onko funktiota olemassa, onko cooldown kulunut ja onko viestissä jotain blacklistattua
             return
         # maybeDeferred will always return a Deferred. It calls func(rest), and
@@ -108,6 +106,9 @@ class IRCProtocol(irc.IRCClient):
     def command_t(self, rest):
         """Yksinkertainen tekstitwiittaus-komento: !t twiitti. Palauttaa twiitin urlin."""
         viesti = decodeIRCmsg(rest).replace('\\n', '\n') # enkoodaus ja newlinet toimimaan \n-muodossa
+        if any(word in viesti for word in blacklist):
+            self.lasttime = 0 # cooldown ohitetaan
+            return
         api.update_status(viesti)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
         print("Twiitattu: %s" % (url))
@@ -121,6 +122,9 @@ class IRCProtocol(irc.IRCClient):
         replytweetauthor = '@' + api.get_status(replytweetid).author.screen_name
         if (replytweetauthor not in viesti) and (replytweetauthor != '@'+user):
             viesti = replytweetauthor + ' ' + viesti
+        if any(word in viesti for word in blacklist):
+            self.lasttime = 0
+            return
         api.update_status(viesti, in_reply_to_status_id=replytweetid)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
         print("Twiitattu: %s" % (url))
@@ -135,17 +139,56 @@ class IRCProtocol(irc.IRCClient):
         imageurl = decodeIRCmsg(rest.split(' ', 1)[0])
         if "imgur.com" not in imageurl:
             return "Uppaa imguriin."
-        viesti = decodeIRCmsg(rest.split(' ', 1)[1]).replace('\\n', '\n') # vaaditaanko viestiä?
+        try:
+            viesti = decodeIRCmsg(rest.split(' ', 1)[1]).replace('\\n', '\n') # vaaditaanko viestiä?
+        except IndexError:
+            viesti = None
         filename = "temp" + get_extension(imageurl)
         request = requests.get(imageurl, stream=True) # vedetään kuva requestiin
         with open(filename, 'wb') as image: # tallennetaan kuva
             for chunk in request:
                 image.write(chunk)
+        if viesti != None:
+            if any(word in viesti for word in blacklist):
+                self.lasttime = 0
+                return
         api.update_with_media(filename, status=viesti)
         os.remove(filename)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
         print("Twiitattu: %s" % (url))
         return url
+
+    def command_tri(self, rest):
+        """Tweet reply image: !tri twiitid kuvanurl twiitti. Edellinen funktio kuvalla."""
+        imageurl = decodeIRCmsg(rest.split(' ', 2)[1])
+        if "imgur.com" not in imageurl:
+            return "Uppaa imguriin."
+        replytweetid = rest.split(' ', 2)[0]
+        replytweetauthor = '@' + api.get_status(replytweetid).author.screen_name
+        try:
+            viesti = decodeIRCmsg(rest.split(' ', 2)[2]).replace('\\n', '\n') # vaaditaanko viestiä?
+            if (replytweetauthor not in viesti) and (replytweetauthor != '@'+user):
+                viesti = replytweetauthor + ' ' + viesti
+        except IndexError:
+            if replytweetauthor != '@'+user:
+                viesti = replytweetauthor
+            else:
+                viesti = None
+        filename = "temp" + get_extension(imageurl)
+        request = requests.get(imageurl, stream=True) # vedetään kuva requestiin
+        with open(filename, 'wb') as image: # tallennetaan kuva
+            for chunk in request:
+                image.write(chunk)
+        if viesti != None:
+            if any(word in viesti for word in blacklist):
+                self.lasttime = 0
+                return
+        api.update_with_media(filename, status=viesti, in_reply_to_status_id=replytweetid)
+        os.remove(filename)
+        url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
+        print("Twiitattu: %s" % (url))
+        return url
+
 
     def checkReplies(self):
         """LooppingCalliin työnnettävä funktio joka lukee replies.txt
