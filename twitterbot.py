@@ -73,7 +73,7 @@ class IRCProtocol(irc.IRCClient):
         irc.IRCClient # Or, if there was no function, ignore the message.
         currenttime = int(time.time()) # uuden komennon lähetysaika talteen
         if func is None or (currenttime-self.lasttime < self.cooldown): 
-        #tarkistaa onko funktiota olemassa, onko cooldown kulunut ja onko viestissä jotain blacklistattua
+        # tarkistaa onko funktiota olemassa, onko cooldown kulunut
             return
         # maybeDeferred will always return a Deferred. It calls func(rest), and
         # if that returned a Deferred, return that. Otherwise, return the
@@ -140,7 +140,7 @@ class IRCProtocol(irc.IRCClient):
         if "imgur.com" not in imageurl:
             return "Uppaa imguriin."
         try:
-            viesti = decodeIRCmsg(rest.split(' ', 1)[1]).replace('\\n', '\n') # vaaditaanko viestiä?
+            viesti = decodeIRCmsg(rest.split(' ', 1)[1]).replace('\\n', '\n')
         except IndexError:
             viesti = None
         filename = "temp" + get_extension(imageurl)
@@ -166,7 +166,7 @@ class IRCProtocol(irc.IRCClient):
         replytweetid = rest.split(' ', 2)[0]
         replytweetauthor = '@' + api.get_status(replytweetid).author.screen_name
         try:
-            viesti = decodeIRCmsg(rest.split(' ', 2)[2]).replace('\\n', '\n') # vaaditaanko viestiä?
+            viesti = decodeIRCmsg(rest.split(' ', 2)[2]).replace('\\n', '\n')
             if (replytweetauthor not in viesti) and (replytweetauthor != '@'+user):
                 viesti = replytweetauthor + ' ' + viesti
         except IndexError:
@@ -175,8 +175,8 @@ class IRCProtocol(irc.IRCClient):
             else:
                 viesti = None
         filename = "temp" + get_extension(imageurl)
-        request = requests.get(imageurl, stream=True) # vedetään kuva requestiin
-        with open(filename, 'wb') as image: # tallennetaan kuva
+        request = requests.get(imageurl, stream=True)
+        with open(filename, 'wb') as image:
             for chunk in request:
                 image.write(chunk)
         if viesti != None:
