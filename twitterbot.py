@@ -3,8 +3,9 @@
 """Built on habnabit's example twisted IRC bot:
    https://gist.github.com/habnabit/5823693"""
 
-import tweepy, requests, time, os, ConfigParser
+import tweepy, requests, time, os, sys, ConfigParser
 from twisted.internet import defer, ssl, endpoints, protocol, reactor, task
+from twisted.python import log
 from twisted.words.protocols import irc
 from urlparse import urlparse
 
@@ -29,6 +30,8 @@ def decodeIRCmsg(bytes):
     return text
 
 def caseInsensitiveComparison(msg, blacklist):
+    if blacklist == []:
+        return 0
     comparisonMsg = msg.upper()
     comparisonBlacklist = [x.upper() for x in blacklist]
     if any(word in comparisonMsg for word in comparisonBlacklist):
@@ -264,6 +267,7 @@ def main(reactor, description):
     return d
 
 if __name__ == '__main__':
+    log.startLogging(sys.stderr)
     consumer_key =  config.get('Twitter','ConsumerKey')
     consumer_secret = config.get('Twitter','ConsumerSecret') 
     access_token = config.get('Twitter','AccessToken')

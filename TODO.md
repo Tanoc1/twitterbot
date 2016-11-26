@@ -1,6 +1,8 @@
 # Twitterbot TODO
 * Mietitään miksei reconnectaus pelaa
 
+* Blacklist-match palauttaa pitkän errorin, mutta ei tunnu aiheuttavan mitään muuta ongelmaa: ongelma johtuu siitä että Twisted odottaa returnista jotain validia stringiä jonka palauttaa kanavalle, mutta itse en halua spämmiä kanavaa millään "blacklisted"-viesteillä, niin olkoon. Katsotaan jos saataisiin palattua funktioista ilman erroria.
+
 * Replyjenseuranta järkevämmäksi (nykyisellään erillinen thread kirjoittaa saadut viestit tiedostoon, josta toinen looppi lukee ne IRC-kanavalle ja tyhjentää tiedoston)
 
 * !ti-komento:
