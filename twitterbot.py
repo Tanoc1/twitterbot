@@ -28,6 +28,14 @@ def decodeIRCmsg(bytes):
             text = bytes.decode('cp1252')
     return text
 
+def caseInsensitiveComparison(msg, blacklist):
+    comparisonMsg = msg.upper()
+    comparisonBlacklist = [x.upper() for x in blacklist]
+    if any(word in comparisonMsg for word in comparisonBlacklist):
+        return 1
+    else:
+        return 0
+
 class IRCProtocol(irc.IRCClient):
     nickname = config.get('IRC','Nickname')
     realname = config.get('IRC','RealName')
@@ -106,7 +114,7 @@ class IRCProtocol(irc.IRCClient):
     def command_t(self, rest):
         """Yksinkertainen tekstitwiittaus-komento: !t twiitti. Palauttaa twiitin urlin."""
         viesti = decodeIRCmsg(rest).replace('\\n', '\n') # enkoodaus ja newlinet toimimaan \n-muodossa
-        if any(word in viesti for word in blacklist):
+        if caseInsensitiveComparison(viesti, blacklist):
             self.lasttime = 0 # cooldown ohitetaan
             return
         api.update_status(viesti)
@@ -122,7 +130,7 @@ class IRCProtocol(irc.IRCClient):
         replytweetauthor = '@' + api.get_status(replytweetid).author.screen_name
         if (replytweetauthor not in viesti) and (replytweetauthor != '@'+user):
             viesti = replytweetauthor + ' ' + viesti
-        if any(word in viesti for word in blacklist):
+        if caseInsensitiveComparison(viesti, blacklist):
             self.lasttime = 0
             return
         api.update_status(viesti, in_reply_to_status_id=replytweetid)
@@ -149,7 +157,7 @@ class IRCProtocol(irc.IRCClient):
             for chunk in request:
                 image.write(chunk)
         if viesti != None:
-            if any(word in viesti for word in blacklist):
+            if caseInsensitiveComparison(viesti, blacklist):
                 self.lasttime = 0
                 return
         api.update_with_media(filename, status=viesti)
@@ -180,7 +188,7 @@ class IRCProtocol(irc.IRCClient):
             for chunk in request:
                 image.write(chunk)
         if viesti != None:
-            if any(word in viesti for word in blacklist):
+            if caseInsensitiveComparison(viesti, blacklist):
                 self.lasttime = 0
                 return
         api.update_with_media(filename, status=viesti, in_reply_to_status_id=replytweetid)
