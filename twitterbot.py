@@ -109,6 +109,8 @@ class IRCProtocol(irc.IRCClient):
             self.lasttime = int(time.time())
 
     def _sendMessage(self, msg, target, nick=None):
+        if msg == "NOMSG":
+            return
         self.msg(target, msg)
 
     def _showError(self, failure):
@@ -119,7 +121,7 @@ class IRCProtocol(irc.IRCClient):
         viesti = decodeIRCmsg(rest).replace('\\n', '\n') # enkoodaus ja newlinet toimimaan \n-muodossa
         if caseInsensitiveComparison(viesti, blacklist):
             self.lasttime = 0 # cooldown ohitetaan
-            return
+            return "NOMSG"
         api.update_status(viesti)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
         print("Twiitattu: %s" % (url))
@@ -135,7 +137,7 @@ class IRCProtocol(irc.IRCClient):
             viesti = replytweetauthor + ' ' + viesti
         if caseInsensitiveComparison(viesti, blacklist):
             self.lasttime = 0
-            return
+            return "NOMSG"
         api.update_status(viesti, in_reply_to_status_id=replytweetid)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
         print("Twiitattu: %s" % (url))
@@ -154,15 +156,15 @@ class IRCProtocol(irc.IRCClient):
             viesti = decodeIRCmsg(rest.split(' ', 1)[1]).replace('\\n', '\n')
         except IndexError:
             viesti = None
+        if viesti != None:
+            if caseInsensitiveComparison(viesti, blacklist):
+                self.lasttime = 0
+                return "NOMSG"
         filename = "temp" + get_extension(imageurl)
         request = requests.get(imageurl, stream=True) # vedetään kuva requestiin
         with open(filename, 'wb') as image: # tallennetaan kuva
             for chunk in request:
                 image.write(chunk)
-        if viesti != None:
-            if caseInsensitiveComparison(viesti, blacklist):
-                self.lasttime = 0
-                return
         api.update_with_media(filename, status=viesti)
         os.remove(filename)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
@@ -185,15 +187,15 @@ class IRCProtocol(irc.IRCClient):
                 viesti = replytweetauthor
             else:
                 viesti = None
+        if viesti != None:
+            if caseInsensitiveComparison(viesti, blacklist):
+                self.lasttime = 0
+                return "NOMSG"
         filename = "temp" + get_extension(imageurl)
         request = requests.get(imageurl, stream=True)
         with open(filename, 'wb') as image:
             for chunk in request:
                 image.write(chunk)
-        if viesti != None:
-            if caseInsensitiveComparison(viesti, blacklist):
-                self.lasttime = 0
-                return
         api.update_with_media(filename, status=viesti, in_reply_to_status_id=replytweetid)
         os.remove(filename)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
