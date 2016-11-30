@@ -101,16 +101,15 @@ class IRCProtocol(irc.IRCClient):
             # When channel == self.nickname, the message was sent to the bot
             # directly and not to a channel. So we will answer directly too:
             d.addCallback(self._sendMessage, nick)
-            self.lasttime = int(time.time()) # vanhan komennon lähetysaika talteen
         else:
             # Otherwise, send the answer to the channel, and use the nick
             # as addressing in the message itself:
             d.addCallback(self._sendMessage, channel, nick)
-            self.lasttime = int(time.time())
 
     def _sendMessage(self, msg, target, nick=None):
         if msg == "NOMSG":
             return
+        self.lasttime = int(time.time())
         self.msg(target, msg)
 
     def _showError(self, failure):
@@ -120,7 +119,6 @@ class IRCProtocol(irc.IRCClient):
         """Yksinkertainen tekstitwiittaus-komento: !t twiitti. Palauttaa twiitin urlin."""
         viesti = decodeIRCmsg(rest).replace('\\n', '\n') # enkoodaus ja newlinet toimimaan \n-muodossa
         if caseInsensitiveComparison(viesti, blacklist):
-            self.lasttime = 0 # cooldown ohitetaan
             return "NOMSG"
         api.update_status(viesti)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
@@ -136,7 +134,6 @@ class IRCProtocol(irc.IRCClient):
         if (replytweetauthor not in viesti) and (replytweetauthor != '@'+user):
             viesti = replytweetauthor + ' ' + viesti
         if caseInsensitiveComparison(viesti, blacklist):
-            self.lasttime = 0
             return "NOMSG"
         api.update_status(viesti, in_reply_to_status_id=replytweetid)
         url = 'http://twitter.com/statuses/%s' % api.user_timeline(id=user)[0].id
@@ -158,7 +155,6 @@ class IRCProtocol(irc.IRCClient):
             viesti = None
         if viesti != None:
             if caseInsensitiveComparison(viesti, blacklist):
-                self.lasttime = 0
                 return "NOMSG"
         filename = "temp" + get_extension(imageurl)
         request = requests.get(imageurl, stream=True) # vedetään kuva requestiin
@@ -189,7 +185,6 @@ class IRCProtocol(irc.IRCClient):
                 viesti = None
         if viesti != None:
             if caseInsensitiveComparison(viesti, blacklist):
-                self.lasttime = 0
                 return "NOMSG"
         filename = "temp" + get_extension(imageurl)
         request = requests.get(imageurl, stream=True)
