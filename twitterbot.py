@@ -220,11 +220,11 @@ class IRCFactory(protocol.ReconnectingClientFactory):
     def clientConnectionLost(self, connector, reason):
         print("IRC-yhteys katkesi: %s" % (reason))
         print("Yritetään yhdistää uusiksi.")
-        connector.connect()
+        self.retry(connector)
     def clientConnectionFailed(self, connector, reason):
         print("Ei saatu yhteyttä IRC-serveriin: %s" % (reason))
-        reactor.stop
-
+        print("Yritetään yhdistää uusiksi.")
+        self.retry(connector)
 
 class ReplyListener(tweepy.StreamListener, IRCFactory, IRCProtocol):
     """Luokka, joka on vastuussa Twitter-streamin monitoroinnista.
