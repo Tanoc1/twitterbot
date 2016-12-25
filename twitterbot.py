@@ -58,7 +58,6 @@ class IRCProtocol(irc.IRCClient):
         print("Yhdistetty IRC-serveriin.")
         for channel in self.factory.channels:
             self.join(channel)
-            print("Joinattu kanavalle %s" % (channel))
         def restartloop(reason): # toimiikohan näin? saa nähdä
             reason.printTraceback()
             print "Replyntarkistusloop kaatui: " + reason.getErrorMessage()
@@ -71,6 +70,9 @@ class IRCProtocol(irc.IRCClient):
             startstream()
             self.loopcall = task.LoopingCall(self.checkReplies)
             self.loopcall.start(15).addErrback(restartloop)
+
+    def joined(self, channel):
+        print("Joinattu kanavalle %s" % (channel))
 
     # Obviously, called when a PRIVMSG is received.
     def privmsg(self, user, channel, message):
